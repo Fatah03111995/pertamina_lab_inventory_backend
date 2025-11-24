@@ -13,12 +13,15 @@ return new class () extends Migration {
     {
         Schema::create('gas_cylinders', function (Blueprint $table) {
             $table->ulid('id')->primary();
+            $table->string('name', 100);
             $table->foreignId('gas_type_id')->nullable()->constrained('gas_types')->nullOnDelete();
-            $table->string('serial_number', 10);
+            $table->string('serial_number', 50);
             $table->string('vendor_code', 100);
-            $table->foreignUlid('current_location_id')->nullable()->constrained('gas_locations')->nullOnDelete();
             $table->enum('status', array_column(GasCylinderStatus::cases(), 'value'));
+            $table->foreignUlid('current_location_id')->nullable()->constrained('gas_locations')->nullOnDelete();
             $table->foreignUlid('company_owner_id')->nullable()->constrained('gas_companies')->nullOnDelete();
+            $table->json('metadata')->nullable();
+            $table->unsignedBigInteger('version')->default(1); //optimistic lock helper
             $table->timestamps();
         });
     }

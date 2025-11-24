@@ -15,8 +15,8 @@ return new class () extends Migration {
             $table->ulid('id')->primary();
             $table->string('document_number', 100);
             $table->enum('event_type', array_column(GasEventType::cases(), 'value'));
-            $table->foreignUlid('company_id')->nullable()->constrained('companies')->nullOnDelete();
-            $table->text('notes')->nullable()->default('');
+            $table->foreignUlid('company_id')->nullable()->constrained('gas_companies')->nullOnDelete();
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }
