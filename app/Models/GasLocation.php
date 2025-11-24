@@ -3,10 +3,9 @@
 namespace App\Models;
 
 use App\Enums\GasLocationCategory;
-use App\Enums\GasLocationType;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
-use LogicException;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class GasLocation extends Model
 {
@@ -16,37 +15,50 @@ class GasLocation extends Model
     public $incrementing = false;
     protected $fillable = [
         'name',
-        'type',
+        'code', // unique
         'category',
         'address'
     ];
 
     protected $casts = [
-        'type' => GasLocationType::class,
         'category' => GasLocationCategory::class
     ];
 
-    public function isExternal()
+    /**
+     * HELPER
+     */
+
+    public function isStorage(): bool
     {
-        if (!$this->category) {
-            throw new LogicException('GasLocation.category tidak boleh null');
-        }
-        return $this->category->isExternal();
+        return $this->category === GasLocationCategory::STORAGE;
     }
 
-    public function isInternal()
+    public function isMaintenance(): bool
     {
-        if (!$this->category) {
-            throw new LogicException('GasLocation.category tidak boleh null');
-        }
-        return $this->category->isInternal();
+        return $this->category === GasLocationCategory::MAINTENANCE;
     }
 
-    public function scopeInternal($q){
-        return $q->where('category', GasLocationCategory::INTERNAL->value);
+    public function isVendor(): bool
+    {
+        return $this->category === GasLocationCategory::VENDOR;
     }
 
-    public function scopeExternal($q){
-        return $q->where('category', GasLocationCategory::EXTERNAL->value);
+    public function isConsumption(): bool
+    {
+        return $this->cateogry === GasLocationCategory::CONSUMPTION;
+    }
+
+    /**
+     * Relation
+     */
+
+    /**
+     * Get all of the gasCylinders for the GasLocation
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function gasCylinders(): HasMany
+    {
+        return $this->hasMany(GasCylinder::class, 'current_location_id');
     }
 }
