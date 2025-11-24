@@ -4,8 +4,10 @@ namespace App\Enums;
 
 enum GasLocationCategory: string
 {
-    case INTERNAL = 'internal';
-    case EXTERNAL = 'external';
+    case STORAGE = 'storage';
+    case CONSUMPTION = 'consumption';
+    case VENDOR = 'vendor' ;
+    case MAINTENANCE = 'maintenance';
 
     public function label()
     {
@@ -21,13 +23,4 @@ enum GasLocationCategory: string
         return $out;
     }
 
-    public function isInternal()
-    {
-        return $this === self::INTERNAL;
-    }
-
-    public function isExternal()
-    {
-        return $this === self::EXTERNAL;
-    }
 }
