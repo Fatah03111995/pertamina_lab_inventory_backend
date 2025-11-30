@@ -38,7 +38,7 @@ enum GasEventType: string
         };
     }
 
-    public function labels()
+    public static function labels()
     {
         $out = [];
         foreach (self::cases() as $case) {
