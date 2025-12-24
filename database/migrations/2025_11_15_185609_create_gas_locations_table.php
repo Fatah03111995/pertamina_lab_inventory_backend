@@ -14,10 +14,11 @@ return new class () extends Migration {
         Schema::create('gas_locations', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->string('name', 100);
-            $table->string('code', 50)->unique();
+            $table->string('code', 50)->unique()->nullable();
             $table->enum('category', array_column(GasLocationCategory::cases(), 'value'));
             $table->Text('address')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

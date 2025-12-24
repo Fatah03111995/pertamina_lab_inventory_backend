@@ -1,0 +1,8 @@
+id;name;min_stock;safety_info;description
+1;Acetylene;3;Flammable;AAS
+2;Argon;4;;AAS
+3;Helium;9;;GC
+4;Hydrogen;4;;GC
+5;Nitrogen;12;;GC
+6;Nitrous Oxide;3;Oxidator;AAS
+7;Oxygen;4;Oxidator;GC

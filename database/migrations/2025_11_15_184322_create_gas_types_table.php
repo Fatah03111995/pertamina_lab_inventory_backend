@@ -12,11 +12,12 @@ return new class () extends Migration {
     {
         Schema::create('gas_types', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 100);
+            $table->string('name', 100)->unique();
             $table->unsignedTinyInteger('min_stock');
             $table->string('safety_info', 100)->nullable();
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

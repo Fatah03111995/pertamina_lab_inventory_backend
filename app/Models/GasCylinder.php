@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class GasCylinder extends Model
 {
     use HasUlids;
+    use SoftDeletes;
 
     public $keyType = 'string';
     public $incrementing = false;
@@ -34,7 +36,7 @@ class GasCylinder extends Model
      * HELPER
      */
 
-    public function isReadyToUse() : bool
+    public function isReadyToUse(): bool
     {
         return in_array($this->status, [
             GasCylinderStatus::FILLED
@@ -86,6 +88,6 @@ class GasCylinder extends Model
      */
     public function events(): HasMany
     {
-        return $this->hasMany(GasHasEvent::class, 'gas_cylinder_id');
+        return $this->hasMany(GasEvent::class, 'gas_cylinder_id');
     }
 }

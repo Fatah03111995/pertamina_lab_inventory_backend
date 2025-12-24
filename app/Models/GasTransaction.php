@@ -7,17 +7,19 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class GasTransaction extends Model
 {
     use HasUlids;
+    use SoftDeletes;
 
     public $keyType = 'string';
     public $incrementing = false;
     protected $fillable = [
-        'document_number',
         'event_type',
-        'company_id',
+        'document_number',
+        'evidence_document',
         'notes',
         'created_by'
     ];
@@ -40,7 +42,6 @@ class GasTransaction extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-
     /**
      * Relation Has Many
      */
@@ -52,6 +53,6 @@ class GasTransaction extends Model
      */
     public function events(): HasMany
     {
-        return $this->hasMany(GasHasEvent::class, 'gas_transaction_id');
+        return $this->hasMany(GasEvent::class, 'gas_transaction_id');
     }
 }

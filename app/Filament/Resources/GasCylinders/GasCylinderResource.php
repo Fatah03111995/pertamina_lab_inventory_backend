@@ -17,12 +17,18 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class GasCylinderResource extends Resource
 {
     protected static ?string $model = GasCylinder::class;
 
     public static ?string $navigationLabel = 'Gas Cylinder';
+
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return 'Database';
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 

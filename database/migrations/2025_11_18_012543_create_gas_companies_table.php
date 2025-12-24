@@ -13,10 +13,12 @@ return new class () extends Migration {
     {
         Schema::create('gas_companies', function (Blueprint $table) {
             $table->ulid('id')->primary();
+            $table->string('name');
             $table->enum('category', array_column(GasCompanyCategory::cases(), 'value'));
             $table->text('address');
-            $table->string('contact', 100);
+            $table->string('contact', 100)->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

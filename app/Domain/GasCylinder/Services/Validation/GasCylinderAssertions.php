@@ -8,6 +8,7 @@ use App\Enums\GasLocationCategory;
 use App\Exceptions\InvariantViolationException;
 use App\Domain\GasCylinder\Entities\GasCylinder;
 use App\Domain\GasCylinder\Entities\GasLocation;
+use App\Models\GasCylinder as ModelsGasCylinder;
 use App\Models\User;
 
 class GasCylinderAssertions
@@ -19,7 +20,7 @@ class GasCylinderAssertions
         GasEventType $eventType,
         ?string $transactionId,
     ) {
-        if ($eventType->requireTransaction() && !$transactionId) {
+        if ($eventType->requireEvidenceDocument() && !$transactionId) {
             throw new InvariantViolationException(
                 "Event {$eventType->value} harus mencantumkan nomor transaksi."
             );
@@ -40,9 +41,16 @@ class GasCylinderAssertions
         }
     }
 
+    public function assertMovementExternal(
+        GasCylinder $cyl,
+        GasLocation $destinationLocation,
+        User $user,
+        array $metadata = []
+    ) {
+    }
+
     public function assertMarkEmpty(
         GasCylinder $cyl,
-        GasLocation $currentLocation,
         User $user,
         array $metadata = []
     ) {
@@ -55,6 +63,7 @@ class GasCylinderAssertions
             ." or "
             .GasCylinderStatus::IN_USE->value);
         }
+        $currentLocation = ModelsGasCylinder::find($cyl->id);
         if (!$currentLocation->isConsumption()) {
             throw new InvariantViolationException("{$cyl->name} location is not in CONSUMPTION category");
         }
@@ -62,11 +71,11 @@ class GasCylinderAssertions
 
     public function assertTakeForRefill(
         GasCylinder $cyl,
-        GasLocation $currentLocation,
         GasLocation $vendorLocation,
         User $user,
         array $metadata = [],
     ) {
+        $currentLocation = ModelsGasCylinder::find($cyl->id);
         if ($cyl->status !== GasCylinderStatus::EMPTY) {
             throw new InvariantViolationException("{$cyl->name} status : {$cyl->status->value}, status gas should be "
             .GasCylinderStatus::EMPTY->value);

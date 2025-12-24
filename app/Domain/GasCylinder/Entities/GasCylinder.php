@@ -3,6 +3,7 @@
 namespace App\Domain\GasCylinder\Entities;
 
 use App\Enums\GasCylinderStatus;
+use App\Models\GasCylinder as ModelGasCylinder;
 
 /**
  * GasCylinder Domain Entity
@@ -26,7 +27,7 @@ class GasCylinder
     /**
      * Create a new GasCylinder entity from a Model instance
      */
-    public static function fromModel(\App\Models\GasCylinder $model): self
+    public static function fromModel(ModelGasCylinder $model): self
     {
         $entity = new self();
         $entity->id = $model->id;

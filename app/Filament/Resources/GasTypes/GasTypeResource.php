@@ -11,6 +11,7 @@ use App\Filament\Resources\GasTypes\Schemas\GasTypeInfolist;
 use App\Filament\Resources\GasTypes\Tables\GasTypesTable;
 use App\Models\GasType;
 use BackedEnum;
+use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -23,6 +24,11 @@ class GasTypeResource extends Resource
     protected static ?string $model = GasType::class;
 
     public static ?string $navigationLabel = 'Tipe Gas';
+
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return 'Database';
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 

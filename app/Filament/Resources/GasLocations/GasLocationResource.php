@@ -11,6 +11,7 @@ use App\Filament\Resources\GasLocations\Schemas\GasLocationInfolist;
 use App\Filament\Resources\GasLocations\Tables\GasLocationsTable;
 use App\Models\GasLocation;
 use BackedEnum;
+use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -23,6 +24,11 @@ class GasLocationResource extends Resource
     protected static ?string $model = GasLocation::class;
 
     public static ?string $navigationLabel = 'Lokasi';
+
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return 'Database';
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 

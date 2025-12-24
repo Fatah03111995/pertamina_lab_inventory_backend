@@ -15,7 +15,10 @@ return new class () extends Migration {
         Schema::create('gas_events', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->foreignUlid('gas_cylinder_id')->nullable()->constrained('gas_cylinders')->nullOnDelete();
-            $table->foreignUlid('gas_transaction_id')->nullable()->constrained('gas_transactions')->nullOnDelete();
+
+            //Cascade on Delete
+            $table->foreignUlid('gas_transaction_id')->nullable()->constrained('gas_transactions')->cascadeOnDelete();
+
             $table->enum('event_type', array_column(GasEventType::cases(), 'value'))->nullable();
             $table->foreignUlid('from_location_id')->nullable()->constrained('gas_locations')->nullOnDelete();
             $table->foreignUlid('to_location_id')->nullable()->constrained('gas_locations')->nullOnDelete();
@@ -25,6 +28,7 @@ return new class () extends Migration {
             $table->foreignUlid('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->json('metadata')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->index(['gas_cylinder_id', 'event_type']);
         });

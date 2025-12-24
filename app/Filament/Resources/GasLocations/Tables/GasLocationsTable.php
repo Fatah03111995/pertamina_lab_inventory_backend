@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\GasLocations\Tables;
 
+use App\Models\GasLocation;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -10,6 +11,8 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
@@ -43,7 +46,14 @@ class GasLocationsTable
             ])
             ->filters([
                 TrashedFilter::make(),
-            ])
+                SelectFilter::make('category')
+                ->label('Kategori')
+                ->options(
+                    GasLocation::query()->pluck('name', 'id')
+                )
+                ->placeholder('Semua')
+                ], FiltersLayout::AboveContentCollapsible)
+            ->filtersFormColumns(2)
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),

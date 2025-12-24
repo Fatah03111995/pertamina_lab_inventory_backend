@@ -7,39 +7,28 @@ use App\Enums\GasEventType;
 use App\Models\GasCylinder as GasCylinderModel;
 use App\Models\GasLocation as GasLocationModel;
 use App\Models\User;
+use App\Domain\GasCylinder\Entities\GasCylinder;
+use App\Domain\GasCylinder\Entities\GasLocation;
 use Illuminate\Support\Facades\DB;
 
 class MovementHandler extends BaseGasCylinderHandler
 {
-    public function useCylinder(
-        GasCylinderModel $cylModel,
+    public function useCylinders(
+        array $cylModels,
         GasLocationModel $consumptionLocationModel,
         User $user,
-        array $metadata = []
-    ) {
-        $cylinder = \App\Domain\GasCylinder\Entities\GasCylinder::fromModel($cylModel);
-        $location = \App\Domain\GasCylinder\Entities\GasLocation::fromModel($consumptionLocationModel);
-
-        $this->assertions->assertUseCylinder($cylinder, $location, $user, $metadata);
-
-        return $this->moveAndTransition(
-            $cylModel,
+        array $metadata = [],
+        string $notes = '',
+        string $transactionId,
+    ): array {
+        return DB::transaction(function () use (
+            $cylModels,
             $consumptionLocationModel,
-            GasCylinderStatus::IN_USE,
-            GasEventType::MOVEMENT_INTERNAL,
             $user,
-            $metadata
-        );
-    }
-
-    /**
-     * Batch version: use multiple cylinders in a single DB transaction.
-     * Accepts an array of GasCylinderModel objects.
-     * Returns array of created GasEvent objects in same order.
-     */
-    public function useCylinders(array $cylModels, GasLocationModel $consumptionLocationModel, User $user, array $metadata = [], string $notes = '', string $transactionId = ''): array
-    {
-        return DB::transaction(function () use ($cylModels, $consumptionLocationModel, $user, $metadata, $notes, $transactionId) {
+            $metadata,
+            $notes,
+            $transactionId,
+        ) {
             $events = [];
             foreach ($cylModels as $cylModel) {
                 $events[] = $this->performTransitionNoTransaction(
@@ -57,39 +46,53 @@ class MovementHandler extends BaseGasCylinderHandler
             return $events;
         });
     }
-    public function markEmpty(
-        GasCylinderModel $cylModel,
-        GasLocationModel $currentLocationModel,
+
+    public function movementExternalMultiple(
+        array $cylModels,
+        GasLocationModel $externalLocation,
         User $user,
-        array $metadata = []
-    ) {
-        $cylinder = \App\Domain\GasCylinder\Entities\GasCylinder::fromModel($cylModel);
-        $location = \App\Domain\GasCylinder\Entities\GasLocation::fromModel($currentLocationModel);
-
-        $this->assertions->assertMarkEmpty($cylinder, $location, $user, $metadata);
-
-        return $this->moveAndTransition(
-            $cylModel,
-            null,
-            GasCylinderStatus::EMPTY,
-            GasEventType::USING,
+        array $metadata = [],
+        string $notes = '',
+        string $transactionId,
+    ): array {
+        return DB::transaction(function () use (
+            $cylModels,
+            $externalLocation,
             $user,
-            $metadata
-        );
+            $metadata,
+            $notes,
+            $transactionId,
+        ) {
+            $events = [];
+
+            foreach ($cylModels as $cylModel) {
+                $cylinder = GasCylinder::fromModel($cylModel);
+                $destinationLocation = GasLocation::fromModel($externalLocation);
+                $this->assertions->assertMovementExternal($cylinder, $destinationLocation, $user, $metadata);
+            }
+            return $events;
+        });
     }
 
-    /**
-     * Batch version: mark multiple cylinders as empty in one transaction.
-     */
-    public function markEmptyMultiple(array $cylModels, GasLocationModel $currentLocationModel, User $user, array $metadata = [], string $notes = '', string $transactionId = ''): array
-    {
-        return DB::transaction(function () use ($cylModels, $currentLocationModel, $user, $metadata, $notes, $transactionId) {
+    public function markEmptyMultiple(
+        array $cylModels,
+        User $user,
+        array $metadata = [],
+        string $notes = '',
+        string $transactionId
+    ): array {
+        return DB::transaction(function () use (
+            $cylModels,
+            $user,
+            $metadata,
+            $notes,
+            $transactionId,
+        ) {
             $events = [];
             foreach ($cylModels as $cylModel) {
-                $cylinder = \App\Domain\GasCylinder\Entities\GasCylinder::fromModel($cylModel);
-                $location = \App\Domain\GasCylinder\Entities\GasLocation::fromModel($currentLocationModel);
+                $cylinder = GasCylinder::fromModel($cylModel);
 
-                $this->assertions->assertMarkEmpty($cylinder, $location, $user, $metadata);
+                $this->assertions->assertMarkEmpty($cylinder, $user, $metadata);
 
                 $events[] = $this->performTransitionNoTransaction(
                     $cylModel,
@@ -107,37 +110,18 @@ class MovementHandler extends BaseGasCylinderHandler
         });
     }
 
-    public function reportLost(
-        GasCylinderModel $cylModel,
+    public function reportLostMultiple(
+        array $cylModels,
         User $user,
         string $notes,
-        array $metadata = []
-    ) {
+        array $metadata = [],
+        string $transactionId
+    ): array {
         if (!$notes || empty($notes)) {
             throw new \App\Exceptions\InvariantViolationException('Harus Mencantumkan Alasan di Catatan');
         }
 
-        return $this->moveAndTransition(
-            $cylModel,
-            null,
-            GasCylinderStatus::LOST,
-            GasEventType::REPORT_LOST,
-            $user,
-            $metadata,
-            $notes
-        );
-    }
-
-    /**
-     * Batch version: report multiple cylinders lost in a single transaction.
-     */
-    public function reportLostMultiple(array $cylModels, User $user, string $notes, array $metadata = []): array
-    {
-        if (!$notes || empty($notes)) {
-            throw new \App\Exceptions\InvariantViolationException('Harus Mencantumkan Alasan di Catatan');
-        }
-
-        return DB::transaction(function () use ($cylModels, $user, $notes, $metadata) {
+        return DB::transaction(function () use ($cylModels, $user, $notes, $metadata, $transactionId) {
             $events = [];
             foreach ($cylModels as $cylModel) {
                 $events[] = $this->performTransitionNoTransaction(
@@ -147,7 +131,8 @@ class MovementHandler extends BaseGasCylinderHandler
                     GasEventType::REPORT_LOST,
                     $user,
                     $metadata,
-                    $notes
+                    $notes,
+                    $transactionId
                 );
             }
 
@@ -155,39 +140,28 @@ class MovementHandler extends BaseGasCylinderHandler
         });
     }
 
-    public function resolveIssue(
-        GasCylinderModel $cylModel,
+    public function resolveIssueMultiple(
+        array $cylModels,
         GasLocationModel $toLocationModel,
         GasCylinderStatus $toStatus,
         User $user,
         string $notes,
-        array $metadata = []
-    ) {
+        array $metadata = [],
+        string $transactionId
+    ): array {
         if (!$notes || empty($notes)) {
             throw new \App\Exceptions\InvariantViolationException('Harus Mencantumkan Alasan di Catatan');
         }
 
-        return $this->moveAndTransition(
-            $cylModel,
+        return DB::transaction(function () use (
+            $cylModels,
             $toLocationModel,
             $toStatus,
-            GasEventType::RESOLVE_ISSUE,
             $user,
+            $notes,
             $metadata,
-            $notes
-        );
-    }
-
-    /**
-     * Batch version: resolve issue for multiple cylinders in a single DB transaction.
-     */
-    public function resolveIssueMultiple(array $cylModels, GasLocationModel $toLocationModel, GasCylinderStatus $toStatus, User $user, string $notes, array $metadata = []): array
-    {
-        if (!$notes || empty($notes)) {
-            throw new \App\Exceptions\InvariantViolationException('Harus Mencantumkan Alasan di Catatan');
-        }
-
-        return DB::transaction(function () use ($cylModels, $toLocationModel, $toStatus, $user, $notes, $metadata) {
+            $transactionId,
+        ) {
             $events = [];
             foreach ($cylModels as $cylModel) {
                 $events[] = $this->performTransitionNoTransaction(
@@ -197,7 +171,8 @@ class MovementHandler extends BaseGasCylinderHandler
                     GasEventType::RESOLVE_ISSUE,
                     $user,
                     $metadata,
-                    $notes
+                    $notes,
+                    $transactionId
                 );
             }
 

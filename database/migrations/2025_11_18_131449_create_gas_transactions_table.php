@@ -13,11 +13,12 @@ return new class () extends Migration {
     {
         Schema::create('gas_transactions', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->string('document_number', 100);
+            $table->string('document_number', 100)->nullable();
             $table->enum('event_type', array_column(GasEventType::cases(), 'value'));
-            $table->foreignUlid('company_id')->nullable()->constrained('gas_companies')->nullOnDelete();
+            $table->string('evidence_document')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

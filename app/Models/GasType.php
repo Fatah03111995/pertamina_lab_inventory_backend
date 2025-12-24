@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class GasType extends Model
 {
+    use SoftDeletes;
     protected $fillable = [
         'name',
         'min_stock',
@@ -26,5 +28,10 @@ class GasType extends Model
     public function gasCylinders(): HasMany
     {
         return $this->hasMany(GasCylinder::class, 'gas_type_id');
+    }
+
+    public function getTotalGasCylinders(): int
+    {
+        return $this->gasCylinders()->count();
     }
 }

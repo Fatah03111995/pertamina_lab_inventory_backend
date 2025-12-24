@@ -12,9 +12,9 @@ enum GasEventType: string
     case MAINTENANCE_END = 'maintenance_end';
     case REPORT_LOST = 'report_lost';
     case RESOLVE_ISSUE = 'resolve_issue';
-    case USING = 'using';
+    case MARK_EMPTY = 'mark_empty';
 
-    public function requireTransaction(): bool
+    public function requireEvidenceDocument(): bool
     {
         return in_array($this, [
             self::TAKE_FOR_REFILL,
@@ -34,7 +34,7 @@ enum GasEventType: string
             self::MAINTENANCE_END => 'Selesai Perbaikan',
             self::REPORT_LOST => 'Lapor Hilang',
             self::RESOLVE_ISSUE => 'Resolve Issue',
-            self::USING => 'Penggunaan',
+            self::MARK_EMPTY => 'Kosong Setelah Digunakan',
         };
     }
 
