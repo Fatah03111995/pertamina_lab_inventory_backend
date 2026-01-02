@@ -96,7 +96,7 @@ class GasEvent
      */
     public function isUsageEvent(): bool
     {
-        return $this->eventType === GasEventType::USING;
+        return $this->eventType === GasEventType::MARK_EMPTY;
     }
 
     /**

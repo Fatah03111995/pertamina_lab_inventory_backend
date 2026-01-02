@@ -16,17 +16,18 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\IconColumn;
 
 class GasTransactionsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
-            ->columns([
-                TextColumn::make('document_number')
-                    ->label('No Dokumen')
-                    ->sortable()
-                    ->searchable(),
+        ->columns([
+                TextColumn::make('created_at')
+                    ->label('Tanggal')
+                    ->date('d / m / Y')
+                    ->sortable(),
                 TextColumn::make('event_type')
                     ->label('Tipe Movement')
                     ->badge()
@@ -43,15 +44,30 @@ class GasTransactionsTable
                             default => 'secondary'
                         };
                     })
+                    ->formatStateUsing(fn ($state) => $state->label())
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('company.name')
-                    ->label('Perusahaan')
-                    ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
+                TextColumn::make('document_number')
+                    ->label('No Dokumen')
+                    ->placeholder('-')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->searchable(),
+                IconColumn::make('evidence_document')
+                    ->label('Berita Acara')
+                    ->placeholder('-')
+                    ->icon(fn ($state) => $state ? 'heroicon-o-document-text' : null)
+                    ->color('primary')
+                    ->url(
+                        fn ($record) =>
+                        $record->evidence_document
+                            ? asset('storage/' . $record->evidence_document)
+                            : null
+                    )
+                    ->openUrlInNewTab(),
+                TextColumn::make('toLocation.name')
+                    ->label('Lokasi Tujuan')
+                    ->placeholder('-')
+                    ->searchable(),
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()

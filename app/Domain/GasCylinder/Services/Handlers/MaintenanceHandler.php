@@ -5,7 +5,6 @@ namespace App\Domain\GasCylinder\Services\Handlers;
 use App\Enums\GasCylinderStatus;
 use App\Enums\GasEventType;
 use App\Models\GasCylinder as GasCylinderModel;
-use Illuminate\Support\Facades\DB;
 use App\Models\GasLocation as GasLocationModel;
 use App\Domain\GasCylinder\Entities\GasCylinder;
 use App\Domain\GasCylinder\Entities\GasLocation;
@@ -21,35 +20,26 @@ class MaintenanceHandler extends BaseGasCylinderHandler
         string $notes = '',
         string $transactionId
     ): array {
-        return DB::transaction(function () use (
-            $cylModels,
-            $maintenanceLocationModel,
-            $user,
-            $metadata,
-            $notes,
-            $transactionId,
-        ) {
-            $events = [];
-            foreach ($cylModels as $cylModel) {
-                $cylinder = GasCylinder::fromModel($cylModel);
-                $maintenanceLocation = GasLocation::fromModel($maintenanceLocationModel);
+        $events = [];
+        foreach ($cylModels as $cylModel) {
+            $cylinder = GasCylinder::fromModel($cylModel);
+            $maintenanceLocation = GasLocation::fromModel($maintenanceLocationModel);
 
-                $this->assertions->assertStartMaintenance($cylinder, $maintenanceLocation, $user, $metadata);
+            $this->assertions->assertStartMaintenance($cylinder, $maintenanceLocation, $user, $metadata);
 
-                $events[] = $this->performTransitionNoTransaction(
-                    $cylModel,
-                    $maintenanceLocationModel,
-                    GasCylinderStatus::MAINTENANCE,
-                    GasEventType::MAINTENANCE_START,
-                    $user,
-                    $metadata,
-                    $notes,
-                    $transactionId
-                );
-            }
+            $events[] = $this->performTransitionNoTransaction(
+                $cylModel,
+                $maintenanceLocationModel,
+                GasCylinderStatus::MAINTENANCE,
+                GasEventType::MAINTENANCE_START,
+                $user,
+                $metadata,
+                $notes,
+                $transactionId
+            );
+        }
 
-            return $events;
-        });
+        return $events;
     }
 
     public function endMaintenanceMultiple(
@@ -60,34 +50,25 @@ class MaintenanceHandler extends BaseGasCylinderHandler
         string $notes = '',
         string $transactionId = ''
     ): array {
-        return DB::transaction(function () use (
-            $cylModels,
-            $storageLocationModel,
-            $user,
-            $metadata,
-            $notes,
-            $transactionId,
-        ) {
-            $events = [];
-            foreach ($cylModels as $cylModel) {
-                $cylinder = GasCylinder::fromModel($cylModel);
-                $storageLocation = GasLocation::fromModel($storageLocationModel);
+        $events = [];
+        foreach ($cylModels as $cylModel) {
+            $cylinder = GasCylinder::fromModel($cylModel);
+            $storageLocation = GasLocation::fromModel($storageLocationModel);
 
-                $this->assertions->assertEndMaintenance($cylinder, $storageLocation, GasCylinderStatus::FILLED, $user, $metadata);
+            $this->assertions->assertEndMaintenance($cylinder, $storageLocation, GasCylinderStatus::FILLED, $user, $metadata);
 
-                $events[] = $this->performTransitionNoTransaction(
-                    $cylModel,
-                    $storageLocationModel,
-                    GasCylinderStatus::FILLED,
-                    GasEventType::MAINTENANCE_END,
-                    $user,
-                    $metadata,
-                    $notes,
-                    $transactionId
-                );
-            }
+            $events[] = $this->performTransitionNoTransaction(
+                $cylModel,
+                $storageLocationModel,
+                GasCylinderStatus::FILLED,
+                GasEventType::MAINTENANCE_END,
+                $user,
+                $metadata,
+                $notes,
+                $transactionId
+            );
+        }
 
-            return $events;
-        });
+        return $events;
     }
 }

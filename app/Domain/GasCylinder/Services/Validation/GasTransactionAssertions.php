@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Domain\GasCylinder\Services\Validation;
+
 use App\Enums\GasEventType;
 use App\Exceptions\InvariantViolationException;
 use App\Models\User;
@@ -8,9 +10,9 @@ class GasTransactionAssertions
 {
     public function assertGeneral(
         GasEventType $eventType,
-        string $documentNumber,
-        string $evidenceDocument,
-        string $notes = '',
+        ?string $documentNumber,
+        ?string $evidenceDocument,
+        ?string $notes,
         User $user,
     ) {
         if ($eventType->requireEvidenceDocument()) {

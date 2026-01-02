@@ -21,30 +21,21 @@ class MovementHandler extends BaseGasCylinderHandler
         string $notes = '',
         string $transactionId,
     ): array {
-        return DB::transaction(function () use (
-            $cylModels,
-            $consumptionLocationModel,
-            $user,
-            $metadata,
-            $notes,
-            $transactionId,
-        ) {
-            $events = [];
-            foreach ($cylModels as $cylModel) {
-                $events[] = $this->performTransitionNoTransaction(
-                    $cylModel,
-                    $consumptionLocationModel,
-                    GasCylinderStatus::IN_USE,
-                    GasEventType::MOVEMENT_INTERNAL,
-                    $user,
-                    $metadata,
-                    $notes,
-                    $transactionId
-                );
-            }
+        $events = [];
+        foreach ($cylModels as $cylModel) {
+            $events[] = $this->performTransitionNoTransaction(
+                $cylModel,
+                $consumptionLocationModel,
+                GasCylinderStatus::IN_USE,
+                GasEventType::MOVEMENT_INTERNAL,
+                $user,
+                $metadata,
+                $notes,
+                $transactionId
+            );
+        }
 
-            return $events;
-        });
+        return $events;
     }
 
     public function movementExternalMultiple(
@@ -55,23 +46,15 @@ class MovementHandler extends BaseGasCylinderHandler
         string $notes = '',
         string $transactionId,
     ): array {
-        return DB::transaction(function () use (
-            $cylModels,
-            $externalLocation,
-            $user,
-            $metadata,
-            $notes,
-            $transactionId,
-        ) {
-            $events = [];
+        $events = [];
 
-            foreach ($cylModels as $cylModel) {
-                $cylinder = GasCylinder::fromModel($cylModel);
-                $destinationLocation = GasLocation::fromModel($externalLocation);
-                $this->assertions->assertMovementExternal($cylinder, $destinationLocation, $user, $metadata);
-            }
-            return $events;
-        });
+        foreach ($cylModels as $cylModel) {
+            $cylinder = GasCylinder::fromModel($cylModel);
+            $destinationLocation = GasLocation::fromModel($externalLocation);
+            $this->assertions->assertMovementExternal($cylinder, $destinationLocation, $user, $metadata);
+        }
+
+        return $events;
     }
 
     public function markEmptyMultiple(
@@ -81,33 +64,25 @@ class MovementHandler extends BaseGasCylinderHandler
         string $notes = '',
         string $transactionId
     ): array {
-        return DB::transaction(function () use (
-            $cylModels,
-            $user,
-            $metadata,
-            $notes,
-            $transactionId,
-        ) {
-            $events = [];
-            foreach ($cylModels as $cylModel) {
-                $cylinder = GasCylinder::fromModel($cylModel);
+        $events = [];
+        foreach ($cylModels as $cylModel) {
+            $cylinder = GasCylinder::fromModel($cylModel);
 
-                $this->assertions->assertMarkEmpty($cylinder, $user, $metadata);
+            $this->assertions->assertMarkEmpty($cylinder, $user, $metadata);
 
-                $events[] = $this->performTransitionNoTransaction(
-                    $cylModel,
-                    null,
-                    GasCylinderStatus::EMPTY,
-                    GasEventType::USING,
-                    $user,
-                    $metadata,
-                    $notes,
-                    $transactionId
-                );
-            }
+            $events[] = $this->performTransitionNoTransaction(
+                $cylModel,
+                null,
+                GasCylinderStatus::EMPTY,
+                GasEventType::MARK_EMPTY,
+                $user,
+                $metadata,
+                $notes,
+                $transactionId
+            );
+        }
 
-            return $events;
-        });
+        return $events;
     }
 
     public function reportLostMultiple(
@@ -121,23 +96,21 @@ class MovementHandler extends BaseGasCylinderHandler
             throw new \App\Exceptions\InvariantViolationException('Harus Mencantumkan Alasan di Catatan');
         }
 
-        return DB::transaction(function () use ($cylModels, $user, $notes, $metadata, $transactionId) {
-            $events = [];
-            foreach ($cylModels as $cylModel) {
-                $events[] = $this->performTransitionNoTransaction(
-                    $cylModel,
-                    null,
-                    GasCylinderStatus::LOST,
-                    GasEventType::REPORT_LOST,
-                    $user,
-                    $metadata,
-                    $notes,
-                    $transactionId
-                );
-            }
+        $events = [];
+        foreach ($cylModels as $cylModel) {
+            $events[] = $this->performTransitionNoTransaction(
+                $cylModel,
+                null,
+                GasCylinderStatus::LOST,
+                GasEventType::REPORT_LOST,
+                $user,
+                $metadata,
+                $notes,
+                $transactionId
+            );
+        }
 
-            return $events;
-        });
+        return $events;
     }
 
     public function resolveIssueMultiple(
@@ -153,30 +126,20 @@ class MovementHandler extends BaseGasCylinderHandler
             throw new \App\Exceptions\InvariantViolationException('Harus Mencantumkan Alasan di Catatan');
         }
 
-        return DB::transaction(function () use (
-            $cylModels,
-            $toLocationModel,
-            $toStatus,
-            $user,
-            $notes,
-            $metadata,
-            $transactionId,
-        ) {
-            $events = [];
-            foreach ($cylModels as $cylModel) {
-                $events[] = $this->performTransitionNoTransaction(
-                    $cylModel,
-                    $toLocationModel,
-                    $toStatus,
-                    GasEventType::RESOLVE_ISSUE,
-                    $user,
-                    $metadata,
-                    $notes,
-                    $transactionId
-                );
-            }
+        $events = [];
+        foreach ($cylModels as $cylModel) {
+            $events[] = $this->performTransitionNoTransaction(
+                $cylModel,
+                $toLocationModel,
+                $toStatus,
+                GasEventType::RESOLVE_ISSUE,
+                $user,
+                $metadata,
+                $notes,
+                $transactionId
+            );
+        }
 
-            return $events;
-        });
+        return $events;
     }
 }

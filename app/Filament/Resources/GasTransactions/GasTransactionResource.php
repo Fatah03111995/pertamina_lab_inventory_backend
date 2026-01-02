@@ -17,6 +17,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\GasTransactions\RelationManagers\GasEventsRelationManager;
 use UnitEnum;
 
 class GasTransactionResource extends Resource
@@ -45,7 +46,7 @@ class GasTransactionResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            GasEventsRelationManager::class,
         ];
     }
 

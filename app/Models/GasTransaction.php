@@ -20,6 +20,7 @@ class GasTransaction extends Model
         'event_type',
         'document_number',
         'evidence_document',
+        'to_location_id',
         'notes',
         'created_by'
     ];
@@ -40,6 +41,16 @@ class GasTransaction extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Get the toLocation that owns the GasTransaction
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function toLocation(): BelongsTo
+    {
+        return $this->belongsTo(GasLocation::class, 'gas_location_id');
     }
 
     /**

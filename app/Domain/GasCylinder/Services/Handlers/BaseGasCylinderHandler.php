@@ -36,7 +36,8 @@ abstract class BaseGasCylinderHandler
         string $notes = '',
         string $transactionId = '',
     ): GasEvent {
-        return DB::transaction(function () use (
+        // Do not start a DB transaction here; caller should manage transactions.
+        return $this->performTransitionNoTransaction(
             $cylModel,
             $toLocationModel,
             $toStatus,
@@ -45,18 +46,7 @@ abstract class BaseGasCylinderHandler
             $metadata,
             $notes,
             $transactionId
-        ) {
-            return $this->performTransitionNoTransaction(
-                $cylModel,
-                $toLocationModel,
-                $toStatus,
-                $eventType,
-                $user,
-                $metadata,
-                $notes,
-                $transactionId
-            );
-        });
+        );
     }
 
     /**

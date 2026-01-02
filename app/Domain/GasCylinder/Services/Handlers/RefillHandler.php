@@ -9,7 +9,8 @@ use App\Models\GasLocation as GasLocationModel;
 use App\Models\User;
 use App\Domain\GasCylinder\Entities\GasLocation;
 use App\Domain\GasCylinder\Entities\GasCylinder;
-use Illuminate\Support\Facades\DB;
+
+// DB transactions are handled by caller; handlers must not start transactions here.
 
 class RefillHandler extends BaseGasCylinderHandler
 {
@@ -21,35 +22,26 @@ class RefillHandler extends BaseGasCylinderHandler
         string $notes = '',
         string $transactionId
     ): array {
-        return DB::transaction(function () use (
-            $cylModels,
-            $vendorLocationModel,
-            $user,
-            $metadata,
-            $notes,
-            $transactionId
-        ) {
-            $events = [];
-            foreach ($cylModels as $cylModel) {
-                $cylinder = GasCylinder::fromModel($cylModel);
-                $vendorLocation = GasLocation::fromModel($vendorLocationModel);
+        $events = [];
+        foreach ($cylModels as $cylModel) {
+            $cylinder = GasCylinder::fromModel($cylModel);
+            $vendorLocation = GasLocation::fromModel($vendorLocationModel);
 
-                $this->assertions->assertTakeForRefill($cylinder, $vendorLocation, $user, $metadata);
+            $this->assertions->assertTakeForRefill($cylinder, $vendorLocation, $user, $metadata);
 
-                $events[] = $this->performTransitionNoTransaction(
-                    $cylModel,
-                    $vendorLocationModel,
-                    GasCylinderStatus::REFILL_PROCESS,
-                    GasEventType::TAKE_FOR_REFILL,
-                    $user,
-                    $metadata,
-                    $notes,
-                    $transactionId
-                );
-            }
+            $events[] = $this->performTransitionNoTransaction(
+                $cylModel,
+                $vendorLocationModel,
+                GasCylinderStatus::REFILL_PROCESS,
+                GasEventType::TAKE_FOR_REFILL,
+                $user,
+                $metadata,
+                $notes,
+                $transactionId
+            );
+        }
 
-            return $events;
-        });
+        return $events;
     }
 
     public function returnFromRefillMultiple(
@@ -60,34 +52,25 @@ class RefillHandler extends BaseGasCylinderHandler
         string $notes = '',
         string $transactionId
     ): array {
-        return DB::transaction(function () use (
-            $cylModels,
-            $storageLocationModel,
-            $user,
-            $metadata,
-            $notes,
-            $transactionId,
-        ) {
-            $events = [];
-            foreach ($cylModels as $cylModel) {
-                $cylinder = GasCylinder::fromModel($cylModel);
-                $storageLocation = GasLocation::fromModel($storageLocationModel);
+        $events = [];
+        foreach ($cylModels as $cylModel) {
+            $cylinder = GasCylinder::fromModel($cylModel);
+            $storageLocation = GasLocation::fromModel($storageLocationModel);
 
-                $this->assertions->assertReturnFromRefill($cylinder, $storageLocation, $user, $metadata);
+            $this->assertions->assertReturnFromRefill($cylinder, $storageLocation, $user, $metadata);
 
-                $events[] = $this->performTransitionNoTransaction(
-                    $cylModel,
-                    $storageLocationModel,
-                    GasCylinderStatus::FILLED,
-                    GasEventType::RETURN_FROM_REFILL,
-                    $user,
-                    $metadata,
-                    $notes,
-                    $transactionId
-                );
-            }
+            $events[] = $this->performTransitionNoTransaction(
+                $cylModel,
+                $storageLocationModel,
+                GasCylinderStatus::FILLED,
+                GasEventType::RETURN_FROM_REFILL,
+                $user,
+                $metadata,
+                $notes,
+                $transactionId
+            );
+        }
 
-            return $events;
-        });
+        return $events;
     }
 }

@@ -16,7 +16,9 @@ return new class () extends Migration {
             $table->string('document_number', 100)->nullable();
             $table->enum('event_type', array_column(GasEventType::cases(), 'value'));
             $table->string('evidence_document')->nullable();
+            $table->foreignUlid('to_location_id')->nullable()->constrained('gas_locations')->nullOnDelete();
             $table->text('notes')->nullable();
+            $table->foreignUlid('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });

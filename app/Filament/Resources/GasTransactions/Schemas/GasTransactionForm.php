@@ -11,7 +11,10 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use App\Models\GasLocation;
 use App\Enums\GasCylinderStatus;
+use App\Enums\GasLocationCategory;
 use App\Models\GasCylinder;
+use Illuminate\Support\Str;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class GasTransactionForm
 {
@@ -26,28 +29,65 @@ class GasTransactionForm
             GasEventType::MOVEMENT_EXTERNAL->value ]);
     }
 
+    protected static function getLocationOptions(?string $eventType)
+    {
+        if (!$eventType) {
+            return collect();
+        }
+        return match ($eventType) {
+            GasEventType::MOVEMENT_EXTERNAL->value =>
+                GasLocation::where('category', GasLocationCategory::VENDOR)
+                    ->pluck('name', 'id'),
+
+            GasEventType::MOVEMENT_INTERNAL->value =>
+                GasLocation::where('category', '!=', GasLocationCategory::VENDOR)
+                    ->pluck('name', 'id'),
+
+            GasEventType::MAINTENANCE_START->value =>
+                GasLocation::where('category', GasLocationCategory::MAINTENANCE)
+                    ->pluck('name', 'id'),
+
+            default =>
+                GasLocation::pluck('name', 'id'),
+        };
+    }
+
     public static function configure(Schema $schema): Schema
     {
         return $schema->columns(2)->components([
 
             Section::make('Informasi Transaksi')
                 ->schema([
-                    Select::make('event_type')
+                Select::make('event_type')
                         ->label('Tipe Pergerakan')
                         ->placeholder('Pilih Tipe Pergerakan')
                         ->options(GasEventType::labels())
                         ->reactive()
                         ->required(),
 
-                    Select::make('to_location_id')
-                        ->label('Lokasi Tujuan')
-                        ->placeholder('Pilih Tujuan')
-                        ->options(GasLocation::all()->pluck('name', 'id'))
-                        ->hidden(fn ($get) => in_array($get('event_type'), [
-                            GasEventType::MARK_EMPTY->value,
-                        ])),
-                ])
-                ->columnSpanFull(),
+                Select::make('to_location_id')
+                    ->label('Lokasi Tujuan')
+                    ->placeholder(function ($get) {
+                        if (! $get('event_type')) {
+                            return 'Pilih Lokasi Tujuan';
+                        }
+
+                        if (static::getLocationOptions($get('event_type'))->isEmpty()) {
+                            return 'Lokasi Belum Tersedia';
+                        }
+
+                        return 'Pilih Lokasi Tujuan';
+                    })
+                    ->reactive()
+                    ->options(function ($get) {
+                        return static::getLocationOptions($get('event_type'));
+                    })
+                    ->hidden(
+                        fn ($get) =>
+                        $get('event_type') === GasEventType::MARK_EMPTY->value
+                    )
+                    ])->columnSpanFull(),
+
 
                 Section::make('Evidence')
                 ->description('Pergerakan untuk pengisian dan pergerakan ke pihak External harus melampirkan dokumen BA atau sejenisnya')
@@ -55,6 +95,7 @@ class GasTransactionForm
                     TextInput::make('document_number')
                         ->label('Document Number')
                         ->placeholder('Ex. BA/PEPC/X/2025 ..')
+                        ->unique()
                         ->maxLength(100)
                         ->required(function ($get) {
                             return static::needDocumentEvidence($get('event_type'));
@@ -62,13 +103,46 @@ class GasTransactionForm
                     FileUpload::make('evidence_document')
                         ->label('Evidence Document')
                         ->helperText('PDF, max 5MB')
+                        ->disk('public')
                         ->directory('gas/evidence')
-                        ->preserveFilenames()
                         ->acceptedFileTypes(['application/pdf'])
                         ->maxSize(5120)
                         ->required(function ($get) {
                             return static::needDocumentEvidence($get('event_type'));
-                        }),
+                        })
+                        ->storeFiles(false)
+                        ->rules([
+                            function ($attribute, $value, $fail) {
+                                if (! $value) {
+                                    return;
+                                }
+
+                                if (! $value->exists()) {
+                                    $fail('File tidak ditemukan. Silakan upload ulang.');
+                                    return;
+                                }
+
+                                if (! $value instanceof TemporaryUploadedFile) {
+                                    $fail('File tidak valid atau sudah tidak tersedia.');
+                                    return;
+                                }
+
+                                if ($value->getSize() > 5 * 1024 * 1024) {
+                                    $fail('Ukuran file maksimal 5 MB.');
+                                }
+                            },
+                        ])
+                        ->getUploadedFileNameForStorageUsing(function ($file, $get) {
+                            $documentNumber = $get('document_number');
+
+                            if (blank($documentNumber)) {
+                                return Str::ulid(). '.pdf';
+                            }
+
+                            $safeName = Str::slug($documentNumber, '-');
+                            return $safeName . '.' . $file->getClientOriginalExtension();
+                        })
+                        ->preserveFilenames(),
                         ])
                         ->columnSpanFull(),
 
@@ -106,10 +180,11 @@ class GasTransactionForm
                     Select::make('to_status')
                                 ->label('Status Akhir')
                                 ->options(GasCylinderStatus::labels())
+                                ->hiddenOn('edit')
                                 ->visible(fn ($get) => in_array($get('event_type'), [
-                                    'return_from_refill', 'maintenance_end', 'movement_external', 'movement_internal',
+                                    'maintenance_start','maintenance_end', 'movement_external', 'movement_internal',
                                 ])),
                 ])->columnSpanFull()
-        ]);
+                            ]);
     }
 }
