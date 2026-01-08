@@ -30,7 +30,7 @@ class GasLocationResource extends Resource
         return 'Database';
     }
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = 'my-location';
 
     public static function form(Schema $schema): Schema
     {

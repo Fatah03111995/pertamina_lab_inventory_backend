@@ -28,7 +28,7 @@ class UserResource extends Resource
         return 'Users and Role';
     }
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = 'my-users';
 
     public static function form(Schema $schema): Schema
     {

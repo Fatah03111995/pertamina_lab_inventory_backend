@@ -30,7 +30,7 @@ class GasCompanyResource extends Resource
         return 'Database';
     }
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = 'my-gas_owner';
 
     public static function form(Schema $schema): Schema
     {

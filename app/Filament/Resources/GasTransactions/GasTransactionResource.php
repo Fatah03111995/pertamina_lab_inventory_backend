@@ -26,7 +26,7 @@ class GasTransactionResource extends Resource
 
     public static ?string $navigationLabel = 'Transaksi Pergerakan';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = 'my-transaction';
 
     public static function form(Schema $schema): Schema
     {
