@@ -11,6 +11,7 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Table;
 use Closure;
+use BackedEnum;
 
 class GenericModelExports implements FromQuery, WithMapping, WithHeadings, ShouldAutoSize, WithChunkReading
 {
@@ -68,7 +69,9 @@ class GenericModelExports implements FromQuery, WithMapping, WithHeadings, Shoul
             // Ambil nilai dari properti atau relasi
             $value = data_get($row, $col->getName());
 
-            // Formatkan sesuai tipe
+            if ($value instanceof BackedEnum) {
+                $value = $value->value;
+            }
             if ($value instanceof \Carbon\Carbon) {
                 $value = $value->format('Y-m-d H:i:s');
             } elseif (is_bool($value)) {
