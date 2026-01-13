@@ -13,14 +13,7 @@ enum GasCylinderStatus: string
 
     public function label()
     {
-        return match($this) {
-            self::FILLED => 'Isi',
-            self::IN_USE => 'Digunakan',
-            self::REFILL_PROCESS => 'Proses Pengisian',
-            self::EMPTY => 'Kosong',
-            self::MAINTENANCE => 'Perawatan',
-            self::LOST => 'Hilang/Tidak Diketahui',
-        };
+        return ucwords(str_replace('_', ' ', $this->value));
     }
 
     public static function labels()
@@ -32,8 +25,34 @@ enum GasCylinderStatus: string
         return $out;
     }
 
+    public function isFilled(): bool
+    {
+        return $this === self::FILLED;
+    }
+
+    public function isInUse(): bool
+    {
+        return $this === self::IN_USE;
+    }
+
+    public function isRefillProcess(): bool
+    {
+        return $this === self::REFILL_PROCESS;
+    }
+
+    public function isMaintenance(): bool
+    {
+        return $this === self::MAINTENANCE;
+    }
+
+    public function isEmpty(): bool
+    {
+        return $this === self::EMPTY;
+    }
+
     public function isLost(): bool
     {
         return $this === self::LOST;
     }
+
 }
