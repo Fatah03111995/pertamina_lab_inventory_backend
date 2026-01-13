@@ -32,22 +32,22 @@ class GasLocation extends Model
 
     public function isStorage(): bool
     {
-        return $this->category === GasLocationCategory::STORAGE;
+        return $this->category->isStorage();
     }
 
     public function isMaintenance(): bool
     {
-        return $this->category === GasLocationCategory::MAINTENANCE;
+        return $this->category->isMaintenance();
     }
 
-    public function isVendor(): bool
+    public function isRefilling(): bool
     {
-        return $this->category === GasLocationCategory::VENDOR;
+        return $this->category->isRefilling();
     }
 
     public function isConsumption(): bool
     {
-        return $this->category === GasLocationCategory::CONSUMPTION;
+        return $this->category->isConsumption();
     }
 
     /**

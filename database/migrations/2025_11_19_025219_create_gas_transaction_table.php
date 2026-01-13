@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\GasCylinderStatus;
-use App\Enums\GasEventType;
+use App\Enums\GasTransactionType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,9 +17,9 @@ return new class () extends Migration {
             $table->foreignUlid('gas_cylinder_id')->nullable()->constrained('gas_cylinders')->nullOnDelete();
 
             //Cascade on Delete
-            $table->foreignUlid('gas_transaction_id')->nullable()->constrained('gas_transactions')->cascadeOnDelete();
+            $table->foreignUlid('header_id')->nullable()->constrained('gas_transactions')->cascadeOnDelete();
 
-            $table->enum('event_type', array_column(GasEventType::cases(), 'value'))->nullable();
+            $table->enum('transaction_type', array_column(GasTransactionType::cases(), 'value'))->nullable();
             $table->foreignUlid('from_location_id')->nullable()->constrained('gas_locations')->nullOnDelete();
             $table->foreignUlid('to_location_id')->nullable()->constrained('gas_locations')->nullOnDelete();
             $table->enum('from_status', array_column(GasCylinderStatus::cases(), 'value'));
@@ -30,7 +30,7 @@ return new class () extends Migration {
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['gas_cylinder_id', 'event_type']);
+            $table->index(['gas_cylinder_id', 'transaction_type']);
         });
     }
 

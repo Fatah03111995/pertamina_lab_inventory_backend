@@ -86,8 +86,8 @@ class GasCylinder extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function events(): HasMany
+    public function trasaction(): HasMany
     {
-        return $this->hasMany(GasEvent::class, 'gas_cylinder_id');
+        return $this->hasMany(GasTransaction::class, 'gas_cylinder_id');
     }
 }
