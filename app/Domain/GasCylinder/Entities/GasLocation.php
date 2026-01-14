@@ -40,7 +40,7 @@ class GasLocation
      */
     public function isStorage(): bool
     {
-        return $this->category === GasLocationCategory::STORAGE;
+        return $this->category->isStorage();
     }
 
     /**
@@ -48,15 +48,15 @@ class GasLocation
      */
     public function isMaintenance(): bool
     {
-        return $this->category === GasLocationCategory::MAINTENANCE;
+        return $this->category->isMaintenance();
     }
 
     /**
      * Check if location is vendor category
      */
-    public function isVendor(): bool
+    public function isRefilling(): bool
     {
-        return $this->category === GasLocationCategory::VENDOR;
+        return $this->category->isRefilling();
     }
 
     /**
@@ -64,7 +64,7 @@ class GasLocation
      */
     public function isConsumption(): bool
     {
-        return $this->category === GasLocationCategory::CONSUMPTION;
+        return $this->category->isConsumption();
     }
 
     /**
