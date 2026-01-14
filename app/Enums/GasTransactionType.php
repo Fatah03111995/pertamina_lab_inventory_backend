@@ -8,8 +8,8 @@ enum GasTransactionType: string
     case MARK_EMPTY = 'mark_empty';
     case TAKE_FOR_REFILL = 'take_for_refill';
     case RETURN_FROM_REFILL = 'return_from_refill';
-    case MAINTENANCE_START = 'maintenance_start';
-    case MAINTENANCE_END = 'maintenance_end';
+    case TAKE_FOR_MAINTENANCE = 'take_for_maintenance';
+    case RETURN_FROM_MAINTENANCE = 'return_from_maintenance';
     case REPORT_LOST = 'report_lost';
     case RESOLVE_ISSUE = 'resolve_issue';
 
@@ -18,8 +18,8 @@ enum GasTransactionType: string
         return in_array($this, [
             self::TAKE_FOR_REFILL,
             self::RETURN_FROM_REFILL,
-            self::MAINTENANCE_START,
-            self::MAINTENANCE_END,
+            self::TAKE_FOR_MAINTENANCE,
+            self::RETURN_FROM_MAINTENANCE,
         ]);
     }
 
