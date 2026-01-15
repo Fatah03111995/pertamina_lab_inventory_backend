@@ -36,4 +36,44 @@ enum GasTransactionType: string
         }
         return $out;
     }
+
+    public function isMovement(): bool
+    {
+        return $this === self::MOVEMENT;
+    }
+
+    public function isMarkEmpty()
+    {
+        return $this === self::MARK_EMPTY;
+    }
+
+    public function isTakeForRefill()
+    {
+        return $this === self::TAKE_FOR_REFILL;
+    }
+
+    public function isReturnFromRefill()
+    {
+        return $this === self::RETURN_FROM_REFILL;
+    }
+
+    public function isTakeForMaintenance()
+    {
+        return $this === self::TAKE_FOR_MAINTENANCE;
+    }
+
+    public function isReturnFromMaintenance()
+    {
+        return $this === self::RETURN_FROM_MAINTENANCE;
+    }
+
+    public function isReportLoss()
+    {
+        return $this === self::REPORT_LOST;
+    }
+
+    public function isResolveissue()
+    {
+        return $this === self::RESOLVE_ISSUE;
+    }
 }
