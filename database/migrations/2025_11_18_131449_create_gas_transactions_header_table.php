@@ -11,7 +11,7 @@ return new class () extends Migration {
      */
     public function up(): void
     {
-        Schema::create('gas_transactions', function (Blueprint $table) {
+        Schema::create('gas_transaction_headers', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->string('document_number', 100)->nullable();
             $table->enum('transaction_type', array_column(GasTransactionType::cases(), 'value'));
@@ -30,6 +30,6 @@ return new class () extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('gas_transactions');
+        Schema::dropIfExists('gas_transaction_headers');
     }
 };

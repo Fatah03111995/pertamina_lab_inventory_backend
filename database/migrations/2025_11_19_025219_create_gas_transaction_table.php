@@ -12,12 +12,12 @@ return new class () extends Migration {
      */
     public function up(): void
     {
-        Schema::create('gas_events', function (Blueprint $table) {
+        Schema::create('gas_transactions', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->foreignUlid('gas_cylinder_id')->nullable()->constrained('gas_cylinders')->nullOnDelete();
 
             //Cascade on Delete
-            $table->foreignUlid('header_id')->nullable()->constrained('gas_transactions')->cascadeOnDelete();
+            $table->foreignUlid('header_id')->nullable()->constrained('gas_transaction_headers')->cascadeOnDelete();
 
             $table->enum('transaction_type', array_column(GasTransactionType::cases(), 'value'))->nullable();
             $table->foreignUlid('from_location_id')->nullable()->constrained('gas_locations')->nullOnDelete();
@@ -39,6 +39,6 @@ return new class () extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('gas_events');
+        Schema::dropIfExists('gas_transactions');
     }
 };
