@@ -73,7 +73,7 @@ class GasTransactionHeader extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function events(): HasMany
+    public function transactions(): HasMany
     {
         return $this->hasMany(GasTransaction::class, 'header_id');
     }
