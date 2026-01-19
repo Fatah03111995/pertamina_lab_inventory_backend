@@ -3,6 +3,7 @@
 namespace App\Domain\GasCylinder\Entities;
 
 use App\Enums\GasLocationCategory;
+use App\Models\GasLocation as GasLocationModel;
 
 /**
  * GasLocation Domain Entity
@@ -21,7 +22,7 @@ class GasLocation
     /**
      * Create a new GasLocation entity from a Model instance
      */
-    public static function fromModel(\App\Models\GasLocation $model): self
+    public static function fromModel(GasLocationModel $model): self
     {
         $entity = new self();
         $entity->id = $model->id;
