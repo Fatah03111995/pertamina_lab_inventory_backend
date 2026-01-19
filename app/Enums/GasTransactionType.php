@@ -23,6 +23,15 @@ enum GasTransactionType: string
         ]);
     }
 
+    public function requireNotes(): bool
+    {
+        return in_array($this, [
+            self::REPORT_LOST,
+            self::RESOLVE_ISSUE,
+            self::TAKE_FOR_MAINTENANCE,
+        ]);
+    }
+
     public function label()
     {
         return ucwords(str_replace('_', ' ', $this->value));

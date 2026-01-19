@@ -55,4 +55,45 @@ enum GasCylinderStatus: string
         return $this === self::LOST;
     }
 
+    public function canTransitionTo(GasCylinderStatus $targetStatus): bool
+    {
+        $allowedTransitions = [
+            self::FILLED->value => [
+                self::FILLED,
+                self::LOST,
+                self::IN_USE,
+                self::MAINTENANCE,
+                self::EMPTY,
+            ],
+            self::IN_USE->value => [
+                self::IN_USE,
+                self::EMPTY,
+                self::MAINTENANCE,
+                self::LOST,
+            ],
+            self::EMPTY->value => [
+                self::EMPTY,
+                self::REFILL_PROCESS,
+                self::LOST,
+            ],
+            self::REFILL_PROCESS->value => [
+                self::FILLED,
+                self::LOST,
+            ],
+            self::MAINTENANCE->value => [
+                self::FILLED,
+                self::EMPTY,
+                self::LOST,
+            ],
+            self::LOST->value => [
+                self::FILLED,
+                self::EMPTY,
+                self::MAINTENANCE
+            ],
+        ];
+
+        $current = $this->value;
+        return isset($allowedTransitions[$current])
+            && in_array($targetStatus, $allowedTransitions[$current]);
+    }
 }
