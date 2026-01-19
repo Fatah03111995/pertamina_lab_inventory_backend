@@ -48,75 +48,34 @@ class GasCylinder
 
     public function isReadyToUse(): bool
     {
-        return $this->status === GasCylinderStatus::FILLED;
+        return $this->status->isFilled();
     }
 
     public function isInUse(): bool
     {
-        return $this->status === GasCylinderStatus::IN_USE;
+        return $this->status->isInUse();
     }
 
     public function isEmpty(): bool
     {
-        return $this->status === GasCylinderStatus::EMPTY;
+        return $this->status->isEmpty();
     }
 
     public function isInRefillProcess(): bool
     {
-        return $this->status === GasCylinderStatus::REFILL_PROCESS;
+        return $this->status->isRefillProcess();
     }
 
     public function isUnderMaintenance(): bool
     {
-        return $this->status === GasCylinderStatus::MAINTENANCE;
+        return $this->status->isMaintenance();
     }
 
     public function isLost(): bool
     {
-        return $this->status === GasCylinderStatus::LOST;
+        return $this->status->isLost();
     }
 
-    /**
-     * Check if cylinder can transition to target status
-     */
-    public function canTransitionTo(GasCylinderStatus $targetStatus): bool
-    {
-        $allowedTransitions = [
-            GasCylinderStatus::FILLED => [
-                GasCylinderStatus::IN_USE,
-                GasCylinderStatus::MAINTENANCE,
-                GasCylinderStatus::EMPTY,
-            ],
-            GasCylinderStatus::IN_USE => [
-                GasCylinderStatus::EMPTY,
-                GasCylinderStatus::MAINTENANCE,
-            ],
-            GasCylinderStatus::EMPTY => [
-                GasCylinderStatus::REFILL_PROCESS,
-                GasCylinderStatus::LOST,
-            ],
-            GasCylinderStatus::REFILL_PROCESS => [
-                GasCylinderStatus::FILLED,
-                GasCylinderStatus::LOST,
-            ],
-            GasCylinderStatus::MAINTENANCE => [
-                GasCylinderStatus::FILLED,
-                GasCylinderStatus::EMPTY,
-            ],
-            GasCylinderStatus::LOST => [
-                GasCylinderStatus::FILLED,
-            ],
-        ];
-
-        $current = $this->status;
-        return isset($allowedTransitions[$current])
-            && in_array($targetStatus, $allowedTransitions[$current]);
-    }
-
-    public function incrementVersion(): void
-    {
-        $this->version++;
-    }
 
     public function getIdentifier(): string
     {
